@@ -1,49 +1,42 @@
-# Docker Infrastructure & Logs Monitor
+# 🐳 Docker Monitor Dashboard
 
-Una herramienta interna para la observabilidad y monitoreo escrita en Python. Este proyecto extrae el ciclo de vida y los metadatos de los contenedores Docker en el host y utiliza MongoDB para el almacenamiento en series de tiempo para su posterior procesamiento, todo auto-orquestado en segundo plano usando Cron Jobs tradicionales adaptados a un ambiente moderno.
+Una solución elegante y moderna para monitorear el estado de tus contenedores Docker en tiempo real. Este proyecto recolecta métricas de tus contenedores locales y las almacena en una base de datos MongoDB para su análisis histórico, presentándolas en un Dashboard visual de alta fidelidad.
 
-## Funcionalidades
-1. **API con FastAPI**: Proporciona endpoints limpios y documentados.
-2. **Conexividad con Docker Daemon**: Extrae el estado, ciclo de vida e imagen de todos los contenedores actuantes en la infraestructura.
-3. **Persistencia de Eventos**: Usa MongoDB para almacenar cada snapshot y crear un registro histórico real.
-4. **Programación Automática**: Tareas en segundo plano confiables auto-inyectadas en el crontab del sistema.
+## 🚀 Inicio Rápido
 
-## Pasos Rápidos
+Todo el sistema está contenedorizado. Solo necesitas tener **Docker** y **Docker Compose** instalados.
 
-### 1. Activar tu ecosistema y Base de Datos
+1. **Clonar y Levantar:**
+   ```bash
+   docker compose up -d --build
+   ```
 
-Puedes usar el archivo docker-compose suministrado para levantar rápidamente la instancia de guardado en el puerto `27017` por defecto.
+2. **Acceder al Dashboard:**
+   Abre tu navegador en: [http://localhost:8000](http://localhost:8000)
 
-```bash
-docker-compose up -d
-```
+## 🛠️ Arquitectura del Sistema
 
-### 2. Configurar el Entorno de Python
+El proyecto se compone de tres piezas fundamentales trabajando en armonía:
 
-Crea y accede un entorno virtual con las versiones en aislamiento y lanza el servidor.
+1.  **Dashboard Visual (Frontend)**: Interfaz moderna construida con HTML5, CSS3 (Glassmorphism) y Vanilla JS. Permite visualizar el estado actual y el historial de eventos.
+2.  **API de Monitoreo (FastAPI)**: El cerebro que interactúa con el Docker Engine de tu host a través del socket `/var/run/docker.sock`.
+3.  **Base de Datos (MongoDB)**: Almacena de forma persistente cada "snapshot" de tus contenedores, permitiendo auditoría y seguimiento histórico.
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python api.py
-```
-> La API quedará escuchando en `http://localhost:8000`
+## 📊 Endpoints de la API
 
-### 3. Ejecutar y Consultar
+Si prefieres interactuar con la API directamente:
 
-Para comprobar en el instante el funcionamiento interactuando con la API y los servicios de infraestructura bajo cubiertas:
-- Para pedir a los procesos Python que hablen con Docker y Mongo para recolectar data: `curl -X POST http://localhost:8000/collect`
-- Para ver los registros y auditoría: `curl http://localhost:8000/stats`
-- Tienes interfaz **Swagger** de prueba en `http://localhost:8000/docs`
+*   `GET /`: Carga el Dashboard visual.
+*   `POST /collect`: Realiza un escaneo inmediato de Docker y guarda los resultados en Mongo.
+*   `GET /stats`: Recupera los últimos registros históricos (soporta el parámetro `?limit=N`).
+*   `GET /docs`: Documentación interactiva (Swagger UI).
 
-### 4. Automatizar la Recolección (Cron)
+## 💡 ¿Por qué MongoDB?
 
-Para conseguir el poder de monitoreo donde el programa opera transparentemente haciendo recortes del rendimiento a lo largo del tiempo, instala el demonizador.
+A diferencia de un simple comando `docker ps`, este sistema utiliza MongoDB para:
+*   **Historial**: Saber qué pasó con tus servicios mientras no estabas mirando.
+*   **Auditoría**: Registrar códigos de salida y errores.
+*   **Persistencia**: Los datos sobreviven a reinicios de la aplicación.
 
-Ejecuta en otra terminal:
-```bash
-chmod +x setup_cron.sh
-./setup_cron.sh
-```
-> Esto añadirá un trabajo de fondo que le indicará a tu sistema operativo host que pingue ininterrumpidamente a la API cada 5 minutos mediante el endpoint de recolección (`/collect`), manteniendo tu base guardada con métricas actualizadas, demostrando una comprensión de cómo auto-operar la infraestructura de servidor de backend.
+---
+Desarrollado con ❤️ para un monitoreo de infraestructura más limpio y visual.

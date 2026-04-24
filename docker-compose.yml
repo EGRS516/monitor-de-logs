@@ -10,6 +10,28 @@ services:
     volumes:
       - mongodb_data:/data/db
     restart: unless-stopped
+    networks:
+      - monitor_network
+
+  api:
+    build: .
+    container_name: monitor_api
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb://egrs:mortadela1@mongodb:27017/
+      - DB_NAME=infra_monitor
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - monitor_network
 
 volumes:
   mongodb_data:
+
+networks:
+  monitor_network:
+    driver: bridge
